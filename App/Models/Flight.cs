@@ -7,9 +7,9 @@ namespace AirportsDemo.App.Models
 {
 	public class Flight
 	{
-		public string Airline { get; private set; }
-		public string SrcAirport { get; private set; }
-		public string DestAirport { get; private set; }
+		public string Airline { get; set; }
+		public string SrcAirport { get; set; }
+		public string DestAirport { get; set; }
 
 		public Flight(string airline, string srcAirport, string destAirport)
 		{
