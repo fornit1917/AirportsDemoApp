@@ -20,19 +20,6 @@ namespace App.Controllers
 			this.flightsApiClient = flightsApiClient;
 		}
 
-		[HttpGet("airports")]
-		public async Task<ActionResult<Airport[]>> Airports(string query)
-		{
-			try
-			{
-				return await flightsApiClient.SearchAirportsAsync(query);
-			}
-			catch (Exception e)
-			{
-				return StatusCode(500, e.Message);
-			}
-		}
-
 		[HttpGet("airline")]
 		public async Task<ActionResult<Airline>> Airline(string alias)
 		{

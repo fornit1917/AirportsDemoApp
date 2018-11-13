@@ -10,6 +10,5 @@ namespace AirportsDemo.App.Services
 	{
 		Task<Airline> GetAirlineAsync(string alias);
 		Task<Flight[]> GetOutgoingFlightsAsync(string airportCode);
-		Task<Airport[]> SearchAirportsAsync(string query);
 	}
 }

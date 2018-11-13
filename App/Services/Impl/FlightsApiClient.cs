@@ -29,10 +29,5 @@ namespace AirportsDemo.App.Services.Impl
 		{
 			return HttpUtils.GetJsonAsync<Flight[]>(httpClient, $"/api/Route/outgoing?airport={airportCode}");
 		}
-
-		public Task<Airport[]> SearchAirportsAsync(string query)
-		{
-			return HttpUtils.GetJsonAsync<Airport[]>(httpClient, $"/api/Airport/search?pattern={query}");
-		}
 	}
 }
