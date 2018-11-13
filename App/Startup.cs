@@ -9,6 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using AirportsDemo.App.Services;
+using AirportsDemo.App.Services.Impl;
+using System.Net.Http;
 
 namespace App
 {
@@ -24,6 +27,12 @@ namespace App
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddHttpClient<IFlightsApiClient, FlightsApiClient>(client => 
+				{
+					client.BaseAddress = new Uri("https://homework.appulate.com");
+				})
+				.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { MaxConnectionsPerServer = 16 });
+
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 		}
 
