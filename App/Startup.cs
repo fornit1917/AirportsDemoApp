@@ -13,7 +13,7 @@ using AirportsDemo.App.Services;
 using AirportsDemo.App.Services.Impl;
 using System.Net.Http;
 
-namespace App
+namespace AirportsDemo.App
 {
 	public class Startup
 	{

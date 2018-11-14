@@ -9,14 +9,17 @@ namespace AirportsDemo.Tests.Mocks
 {
 	class FlightsApiClientMock : IFlightsApiClient
 	{
+		private AirlinesFixtures airlines = new AirlinesFixtures();
+		private FlightsFixtures flights = new FlightsFixtures();
+
 		public Task<Airline> GetAirlineAsync(string alias)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult(airlines.GetAirline(alias));
 		}
 
 		public Task<Flight[]> GetOutgoingFlightsAsync(string airportCode)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult(flights.GetOutgoingFlights(airportCode));
 		}
 	}
 }
