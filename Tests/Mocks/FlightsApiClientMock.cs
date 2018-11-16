@@ -7,23 +7,20 @@ using AirportsDemo.App.Services;
 
 namespace AirportsDemo.Tests.Mocks
 {
-	class FlightsApiClientMock : IFlightsApiClient
-	{
-		private AirlinesFixtures airlines = new AirlinesFixtures();
-		private FlightsFixtures flights = new FlightsFixtures();
+    class FlightsApiClientMock : IFlightsApiClient
+    {
+        private AirlinesFixtures airlines = new AirlinesFixtures();
+        private FlightsFixtures flights = new FlightsFixtures();
 
-		public Task<Airline> GetAirlineAsync(string alias)
-		{
-			return Task.FromResult(airlines.GetAirline(alias));
-		}
+        public Task<Airline> GetAirlineAsync(string alias) {
+            return Task.FromResult(airlines.GetAirline(alias));
+        }
 
-		public Task<Flight[]> GetOutgoingFlightsAsync(string airportCode)
-		{
-			if (airportCode == "THROW_ERROR")
-			{
-				throw new Exception("Service unavailable");
-			}
-			return Task.FromResult(flights.GetOutgoingFlights(airportCode));
-		}
-	}
+        public Task<Flight[]> GetOutgoingFlightsAsync(string airportCode) {
+            if (airportCode == "THROW_ERROR") {
+                throw new Exception("Service unavailable");
+            }
+            return Task.FromResult(flights.GetOutgoingFlights(airportCode));
+        }
+    }
 }

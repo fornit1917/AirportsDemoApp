@@ -6,8 +6,8 @@ using AirportsDemo.App.Models;
 
 namespace AirportsDemo.App.Services
 {
-	public interface IFlightsService
-	{
-		Task<List<Flight>> GetActiveOutgoingFlightsAsync(string airportCode);
-	}
+    public interface IFlightsService
+    {
+        Task<List<Flight>> GetActiveOutgoingFlightsAsync(string airportCode);
+    }
 }

@@ -6,9 +6,9 @@ using AirportsDemo.App.Models;
 
 namespace AirportsDemo.App.Services
 {
-	public interface IAirlinesCache
-	{
-		Airline Get(string alias);
-		void Set(Airline airline);
-	}
+    public interface IAirlinesCache
+    {
+        Airline Get(string alias);
+        void Set(Airline airline);
+    }
 }

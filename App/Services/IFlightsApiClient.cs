@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace AirportsDemo.App.Services
 {
-	public interface IFlightsApiClient
-	{
-		Task<Airline> GetAirlineAsync(string alias);
-		Task<Flight[]> GetOutgoingFlightsAsync(string airportCode);
-	}
+    public interface IFlightsApiClient
+    {
+        Task<Airline> GetAirlineAsync(string alias);
+        Task<Flight[]> GetOutgoingFlightsAsync(string airportCode);
+    }
 }
