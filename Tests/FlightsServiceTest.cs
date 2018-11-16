@@ -12,14 +12,7 @@ namespace AirportsDemo.Tests
 	[TestClass]
 	public class FlightsServiceTest
 	{
-		private IFlightsService flightsService;
-
-		public FlightsServiceTest()
-		{
-			IFlightsApiClient flightsApiClient = new FlightsApiClientMock();
-			IAirlinesCache airlinesCache = new AirlinesCache();
-			flightsService = new FlightsService(flightsApiClient, airlinesCache);
-		}
+		private FlightsService flightsService = Factory.CreateMockedFlightsService();
 
 		[TestMethod]
 		public void TestGetActiveOutgoingFlightsForIncorrectAirport()

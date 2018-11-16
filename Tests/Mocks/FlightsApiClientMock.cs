@@ -19,6 +19,10 @@ namespace AirportsDemo.Tests.Mocks
 
 		public Task<Flight[]> GetOutgoingFlightsAsync(string airportCode)
 		{
+			if (airportCode == "THROW_ERROR")
+			{
+				throw new Exception("Service unavailable");
+			}
 			return Task.FromResult(flights.GetOutgoingFlights(airportCode));
 		}
 	}
