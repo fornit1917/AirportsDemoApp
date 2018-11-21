@@ -4,18 +4,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using AirportsDemo.App.Services;
 using AirportsDemo.App.Models;
+using System.Threading;
 
 namespace AirportsDemo.App.Services.Impl
 {
     public class RouteFinder : IRouteFinder
     {
         private IFlightsService flightsService;
+        private SemaphoreSlim semaphore;
+        private int maxDepth;
 
-        public RouteFinder(IFlightsService flightsService) {
+        public RouteFinder(IFlightsService flightsService, RouteFinderConfig config) {
             this.flightsService = flightsService;
+            semaphore = new SemaphoreSlim(config.MaxDegreeOfParallelism, config.MaxDegreeOfParallelism);
+            maxDepth = config.MaxRouteDepth;
         }
 
-        public Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport, int maxDepth = 10) {
+        public Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport) {
             RouteFinderContext ctx = new RouteFinderContext(destAirport, maxDepth);
             RunFinderSubTaskAsync(srcAirport, null, ctx);
             return ctx.ResultTask;
@@ -31,6 +36,8 @@ namespace AirportsDemo.App.Services.Impl
 
             Task.Run(async () => {
                 try {
+                    await semaphore.WaitAsync();
+
                     if (ctx.CancellationToken.IsCancellationRequested) {
                         return;
                     }
@@ -56,11 +63,12 @@ namespace AirportsDemo.App.Services.Impl
                 } catch (Exception e) {
                     ctx.SetException(e);
                 } finally {
+                    semaphore.Release();
                     if (ctx.DecrementTasksCount() == 0) {
                         ctx.SetResult(Array.Empty<Flight>());
                     }
                 }
-            }, ctx.CancellationToken);
+            });
         }
     }
 }

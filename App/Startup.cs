@@ -27,14 +27,17 @@ namespace AirportsDemo.App
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
+            var routeFinderConfig = new RouteFinderConfig();
+            Configuration.GetSection("RouteFinder").Bind(routeFinderConfig);
+            services.AddSingleton(routeFinderConfig);
+
             services.AddHttpClient<IFlightsApiClient, FlightsApiClient>(client => {
                 client.BaseAddress = new Uri("https://homework.appulate.com");
             })
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { MaxConnectionsPerServer = 4 })
             .AddPolicyHandler(
                 HttpPolicyExtensions
                     .HandleTransientHttpError()
-                    .WaitAndRetryAsync(3, retryAttemt => TimeSpan.FromSeconds(1))
+                    .WaitAndRetryAsync(routeFinderConfig.RetryRequestCount, retryAttemt => TimeSpan.FromSeconds(1))
             );
 
             services.AddScoped<IAirlinesCache, AirlinesCache>();

@@ -13,7 +13,7 @@ namespace AirportsDemo.Tests
     [TestClass]
     public class RouteFinderTest
     {
-        private RouteFinder routeFinder = Factory.CreateMockedRouteFinder();
+        private RouteFinder routeFinder = Factory.CreateMockedRouteFinder(8);
 
         [TestMethod]
         public void TestFindRouteForIncorrectAirports() {
@@ -59,11 +59,12 @@ namespace AirportsDemo.Tests
 
         [TestMethod]
         public void TestFindRouteWhenMaxDepthReached() {
-            Flight[] route = routeFinder.FindRouteAsync("LINE_1", "LINE_4", 2).Result;
+            RouteFinder limitedRouteFinder = Factory.CreateMockedRouteFinder(2);
+            Flight[] route = limitedRouteFinder.FindRouteAsync("LINE_1", "LINE_4").Result;
             Assert.IsNotNull(route);
             Assert.AreEqual(0, route.Length);
 
-            route = routeFinder.FindRouteAsync("LINE_1", "LINE_4", 10).Result;
+            route = routeFinder.FindRouteAsync("LINE_1", "LINE_4").Result;
             Assert.IsNotNull(route);
             Assert.AreNotEqual(0, route.Length);
         }

@@ -8,6 +8,6 @@ namespace AirportsDemo.App.Services
 {
     public interface IRouteFinder
     {
-        Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport, int maxDepth = 10);
+        Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport);
     }
 }

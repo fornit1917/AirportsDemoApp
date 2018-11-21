@@ -14,8 +14,8 @@ namespace AirportsDemo.Tests.Mocks
             return new FlightsService(flightsApiClient, airlinesCache);
         }
 
-        public static RouteFinder CreateMockedRouteFinder() {
-            return new RouteFinder(CreateMockedFlightsService());
+        public static RouteFinder CreateMockedRouteFinder(int maxRouteDepth) {
+            return new RouteFinder(CreateMockedFlightsService(), new App.RouteFinderConfig() { MaxRouteDepth = maxRouteDepth, MaxDegreeOfParallelism = 4 });
         }
     }
 }
