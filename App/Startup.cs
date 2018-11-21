@@ -12,6 +12,8 @@ using Microsoft.Extensions.Options;
 using AirportsDemo.App.Services;
 using AirportsDemo.App.Services.Impl;
 using System.Net.Http;
+using Polly.Extensions.Http;
+using Polly;
 
 namespace AirportsDemo.App
 {
@@ -25,11 +27,19 @@ namespace AirportsDemo.App
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            services.AddHttpClient<IFlightsApiClient, FlightsApiClient>(client =>
-            {
+            services.AddHttpClient<IFlightsApiClient, FlightsApiClient>(client => {
                 client.BaseAddress = new Uri("https://homework.appulate.com");
             })
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { MaxConnectionsPerServer = 16 });
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { MaxConnectionsPerServer = 4 })
+            .AddPolicyHandler(
+                HttpPolicyExtensions
+                    .HandleTransientHttpError()
+                    .WaitAndRetryAsync(3, retryAttemt => TimeSpan.FromSeconds(1))
+            );
+
+            services.AddScoped<IAirlinesCache, AirlinesCache>();
+            services.AddScoped<IFlightsService, FlightsService>();
+            services.AddScoped<IRouteFinder, RouteFinder>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

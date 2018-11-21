@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AirportsDemo.App.Models;
+using AirportsDemo.App.Services;
 
 namespace AirportsDemo.App.Controllers
 {
@@ -11,10 +12,16 @@ namespace AirportsDemo.App.Controllers
     [ApiController]
     public class RouteController : ControllerBase
     {
+        private IRouteFinder routeFinder;
+
+        public RouteController(IRouteFinder routeFinder) {
+            this.routeFinder = routeFinder;
+        }
+
         [HttpGet("search")]
-        public Task<Flight[]> Search(string srcAirport, string destAirport) {
-            var testData = new Flight[2] { new Flight("Airline_1", srcAirport, "SomeAirport"), new Flight("Airline_2", "SomeAirport", destAirport) };
-            return Task.FromResult(testData);
+        public async Task<ActionResult<Flight[]>> Search(string srcAirport, string destAirport) {
+            Flight[] route = await routeFinder.FindRouteAsync(srcAirport, destAirport);
+            return Ok(route);
         }
     }
 }
