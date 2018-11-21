@@ -31,10 +31,14 @@ namespace AirportsDemo.App.Services.Impl
         }
 
         private async Task<TResult> GetJsonAsync<TResult>(string uri) {
-            HttpResponseMessage resp = await httpClient.GetAsync(uri);
-            resp.EnsureSuccessStatusCode();
-            string json = await resp.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<TResult>(json);
+            try {
+                HttpResponseMessage resp = await httpClient.GetAsync(uri);
+                resp.EnsureSuccessStatusCode();
+                string json = await resp.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<TResult>(json);
+            } catch (HttpRequestException e) {
+                throw new HttpRequestException($"Flights API error: {uri}", e);
+            }
         }
     }
 }

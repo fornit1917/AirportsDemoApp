@@ -50,6 +50,8 @@ namespace AirportsDemo.App
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
+
             app.UseMvc();
         }
     }
