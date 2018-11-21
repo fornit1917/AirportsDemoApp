@@ -60,7 +60,7 @@ namespace AirportsDemo.App.Services.Impl
                         ctx.SetResult(Array.Empty<Flight>());
                     }
                 }
-            });
+            }, ctx.CancellationToken);
         }
     }
 }
