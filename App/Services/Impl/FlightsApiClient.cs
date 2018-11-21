@@ -6,7 +6,6 @@ using System.Net.Http;
 using AirportsDemo.App.Services;
 using AirportsDemo.App.Models;
 using Newtonsoft.Json;
-using AirportsDemo.App.Utils;
 
 namespace AirportsDemo.App.Services.Impl
 {
@@ -19,12 +18,19 @@ namespace AirportsDemo.App.Services.Impl
         }
 
         public async Task<Airline> GetAirlineAsync(string alias) {
-            Airline[] airlines = await HttpUtils.GetJsonAsync<Airline[]>(httpClient, $"/api/Airline/{alias}");
+            Airline[] airlines = await GetJsonAsync<Airline[]>($"/api/Airline/{alias}");
             return airlines.Length > 0 ? airlines[0] : null;
         }
 
         public Task<Flight[]> GetOutgoingFlightsAsync(string airportCode) {
-            return HttpUtils.GetJsonAsync<Flight[]>(httpClient, $"/api/Route/outgoing?airport={airportCode}");
+            return GetJsonAsync<Flight[]>($"/api/Route/outgoing?airport={airportCode}");
+        }
+
+        private async Task<TResult> GetJsonAsync<TResult>(string uri) {
+            HttpResponseMessage resp = await httpClient.GetAsync(uri);
+            resp.EnsureSuccessStatusCode();
+            string json = await resp.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<TResult>(json);
         }
     }
 }
