@@ -9,5 +9,6 @@ namespace AirportsDemo.App.Services
     public interface IFlightsService
     {
         Task<List<Flight>> GetActiveOutgoingFlightsAsync(string airportCode);
+        Task<ValidationResult> ValidateAirportCodeAsync(string airportCode);
     }
 }

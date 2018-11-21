@@ -29,6 +29,22 @@ namespace AirportsDemo.App.Services.Impl
             return result;
         }
 
+        public async Task<ValidationResult> ValidateAirportCodeAsync(string airportCode) {
+            if (airportCode.Length != 3 && airportCode.Length != 4) {
+                return new ValidationResult(ValidationErrorType.BadFormat, "Airport code should be 3 or 4 character long");
+            }
+            Airport airport = await GetAirportByCode(airportCode);
+            if (airport == null) {
+                return new ValidationResult(ValidationErrorType.NotFound, $"Airport {airportCode} is not found");
+            }
+            return ValidationResult.Success;
+        }
+
+        private async Task<Airport> GetAirportByCode(string airportCode) {
+            Airport[] airports = await apiClient.SearchAirports(airportCode);
+            return airports.Where(airport => airport.Alias == airportCode).FirstOrDefault();
+        }
+
         private async Task<bool> IsAirlineActive(string airlineCode) {
             Airline airline = airlinesCache.Get(airlineCode);
             if (airline == null) {

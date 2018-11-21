@@ -29,5 +29,25 @@ namespace AirportsDemo.Tests
             Assert.AreEqual("UJ", flights[0].Airline);
             Assert.AreEqual("UJ", flights[1].Airline);
         }
+
+        [TestMethod]
+        public void TestValidateAirportCode() {
+            ValidationResult validationResult;
+
+            validationResult = flightsService.ValidateAirportCodeAsync("A").Result;
+            Assert.IsFalse(validationResult.IsValid);
+            Assert.AreEqual(ValidationErrorType.BadFormat, validationResult.ErrorType);
+
+            validationResult = flightsService.ValidateAirportCodeAsync("AAAAAAAA").Result;
+            Assert.IsFalse(validationResult.IsValid);
+            Assert.AreEqual(ValidationErrorType.BadFormat, validationResult.ErrorType);
+
+            validationResult = flightsService.ValidateAirportCodeAsync("EMPT").Result;
+            Assert.IsFalse(validationResult.IsValid);
+            Assert.AreEqual(ValidationErrorType.NotFound, validationResult.ErrorType);
+
+            validationResult = flightsService.ValidateAirportCodeAsync("VOZ").Result;
+            Assert.IsTrue(validationResult.IsValid);
+        }
     }
 }

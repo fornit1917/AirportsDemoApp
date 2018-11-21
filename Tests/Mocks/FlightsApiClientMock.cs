@@ -22,5 +22,16 @@ namespace AirportsDemo.Tests.Mocks
             }
             return Task.FromResult(flights.GetOutgoingFlights(airportCode));
         }
+
+        public Task<Airport[]> SearchAirports(string pattern) {
+            if (pattern == "EMPT") {
+                return Task.FromResult(Array.Empty<Airport>());
+            }
+
+            return Task.FromResult(new Airport[] {
+                new Airport() { Alias = pattern, City = "Some ciry" },
+                new Airport() { Alias = "NOT_" + pattern, City = pattern + " City" },
+            });
+        }
     }
 }

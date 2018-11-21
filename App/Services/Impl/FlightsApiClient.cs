@@ -26,6 +26,10 @@ namespace AirportsDemo.App.Services.Impl
             return GetJsonAsync<Flight[]>($"/api/Route/outgoing?airport={airportCode}");
         }
 
+        public Task<Airport[]> SearchAirports(string pattern) {
+            return GetJsonAsync<Airport[]>($"/api/Airport/search?pattern={pattern}");
+        }
+
         private async Task<TResult> GetJsonAsync<TResult>(string uri) {
             HttpResponseMessage resp = await httpClient.GetAsync(uri);
             resp.EnsureSuccessStatusCode();
