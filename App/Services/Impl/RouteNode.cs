@@ -8,21 +8,28 @@ namespace AirportsDemo.App.Services.Impl
 {
     public class RouteNode
     {
-        private readonly RouteNode prevNode;
+        public string Airport { get; private set; }
         public int Depth { get; private set; }
-        public Flight Flight { get; private set; }
 
-        public RouteNode(Flight flight, RouteNode prevNode) {
+        private readonly Flight flight;
+        private readonly RouteNode prevNode;
+
+        public RouteNode(string airport, Flight flight, RouteNode prevNode) {
             this.prevNode = prevNode;
-            Flight = flight;
-            Depth = prevNode == null ? 1 : prevNode.Depth + 1;
+            this.flight = flight;
+            Airport = airport;
+            Depth = prevNode == null ? 0 : prevNode.Depth + 1;
         }
 
         public Flight[] GetFullRoute() {
+            if (Depth == 0) {
+                return Array.Empty<Flight>();
+            }
+
             Flight[] result = new Flight[Depth];
             RouteNode node = this;
-            for (int i = Depth - 1; i > -1; i--) {
-                result[i] = node.Flight;
+            for (int i = Depth; i > 0; i--) {
+                result[i - 1] = node.flight;
                 node = node.prevNode;
             }
             return result;

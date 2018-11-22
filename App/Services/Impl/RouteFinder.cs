@@ -11,64 +11,61 @@ namespace AirportsDemo.App.Services.Impl
     public class RouteFinder : IRouteFinder
     {
         private IFlightsService flightsService;
-        private SemaphoreSlim semaphore;
-        private int maxDepth;
+        private RouteFinderConfig config;
 
         public RouteFinder(IFlightsService flightsService, RouteFinderConfig config) {
             this.flightsService = flightsService;
-            semaphore = new SemaphoreSlim(config.MaxDegreeOfParallelism, config.MaxDegreeOfParallelism);
-            maxDepth = config.MaxRouteDepth;
+            this.config = config;
         }
 
-        public Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport) {
-            RouteFinderContext ctx = new RouteFinderContext(destAirport, maxDepth);
-            RunFinderSubTaskAsync(srcAirport, null, ctx);
-            return ctx.ResultTask;
-        }
+        public async Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport) {
+            var visitedAirports = new HashSet<string>();
+            visitedAirports.Add(srcAirport);
 
-        private void RunFinderSubTaskAsync(string airport, RouteNode prevRouteNode, RouteFinderContext ctx) {
-            if (ctx.IsAirportVisited(airport) || ctx.CancellationToken.IsCancellationRequested) {
-                return;
-            }
+            var queue = new Queue<RouteNode>();
+            queue.Enqueue(new RouteNode(srcAirport, null, null));
 
-            ctx.MarkAirportAsVisited(airport);
-            ctx.IncrementTasksCount();
+            while (queue.Count > 0) {
+                List<RouteNode> parents = BatchDequeue(queue, config.MaxDegreeOfParallelism);
 
-            Task.Run(async () => {
-                try {
-                    await semaphore.WaitAsync();
+                List<Flight>[] childrenData = await Task.WhenAll(
+                    parents.Select(item => flightsService.GetActiveOutgoingFlightsAsync(item.Airport))
+                );
 
-                    if (ctx.CancellationToken.IsCancellationRequested) {
-                        return;
-                    }
+                for (int i = 0; i < childrenData.Length; i++) {
+                    RouteNode parent = parents[i];
+                    List<Flight> outgoingFlights = childrenData[i];
+                    foreach (var flight in outgoingFlights) {
+                        if (flight.DestAirport == destAirport) {
+                            return new RouteNode(flight.DestAirport, flight, parent).GetFullRoute();
+                        }
 
-                    List<Flight> outgoingFlights = await flightsService.GetActiveOutgoingFlightsAsync(airport);
-                    if (outgoingFlights.Count == 0 || ctx.CancellationToken.IsCancellationRequested) {
-                        return;
-                    }
+                        if (visitedAirports.Contains(flight.DestAirport)) {
+                            continue;
+                        }
 
-                    Flight finishFlight = outgoingFlights.Find(flight => flight.DestAirport == ctx.destAirport);
-                    if (finishFlight != null) {
-                        RouteNode routeNode = new RouteNode(finishFlight, prevRouteNode);
-                        ctx.SetResult(routeNode.GetFullRoute());
-                    } else {
-                        int depth = prevRouteNode != null ? prevRouteNode.Depth + 1 : 0;
-                        if (depth < ctx.maxDepth) {
-                            foreach (var flight in outgoingFlights) {
-                                RouteNode nextRouteNode = new RouteNode(flight, prevRouteNode);
-                                RunFinderSubTaskAsync(flight.DestAirport, nextRouteNode, ctx);
-                            }
+                        visitedAirports.Add(flight.DestAirport);
+
+                        if (parent.Depth + 1 < config.MaxRouteDepth) {
+                            queue.Enqueue(new RouteNode(flight.DestAirport, flight, parent));
                         }
                     }
-                } catch (Exception e) {
-                    ctx.SetException(e);
-                } finally {
-                    semaphore.Release();
-                    if (ctx.DecrementTasksCount() == 0) {
-                        ctx.SetResult(Array.Empty<Flight>());
-                    }
                 }
-            });
+            }
+
+            return Array.Empty<Flight>();
+        }
+
+        private List<RouteNode> BatchDequeue(Queue<RouteNode> q, int batchSize) {
+            var items = new List<RouteNode>();
+            for (int i = 0; i < batchSize; i++) {
+                if (q.TryDequeue(out RouteNode item)) {
+                    items.Add(item);
+                } else {
+                    break;
+                }
+            }
+            return items;
         }
     }
 }

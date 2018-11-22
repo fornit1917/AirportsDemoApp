@@ -13,9 +13,10 @@ namespace AirportsDemo.Tests
         [TestMethod]
         public void TestGetOneFlightRoute() {
             Flight flight = new Flight("airline", "src", "dest");
-            RouteNode node = new RouteNode(flight, null);
+            RouteNode first = new RouteNode("src", null, null);
+            RouteNode second = new RouteNode("dest", new Flight("airline", "src", "dest"), first);
 
-            Flight[] route = node.GetFullRoute();
+            Flight[] route = second.GetFullRoute();
             Assert.IsNotNull(route);
             Assert.AreEqual(1, route.Length);
             Assert.AreEqual("airline", route[0].Airline);
@@ -30,9 +31,9 @@ namespace AirportsDemo.Tests
                 new Flight("airline_2", "airport_2", "airport_3"),
                 new Flight("airline_3", "airport_3", "airport_4"),
             };
-            RouteNode node = null;
+            RouteNode node = new RouteNode("airport_1", null, null);
             foreach (var flight in flights) {
-                node = new RouteNode(flight, node);
+                node = new RouteNode(flight.DestAirport, flight, node);
             }
 
             Flight[] route = node.GetFullRoute();
