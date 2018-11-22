@@ -34,8 +34,7 @@ namespace AirportsDemo.App.Services.Impl
             try {
                 HttpResponseMessage resp = await httpClient.GetAsync(uri);
                 resp.EnsureSuccessStatusCode();
-                string json = await resp.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<TResult>(json);
+                return await resp.Content.ReadAsAsync<TResult>();
             } catch (HttpRequestException e) {
                 throw new HttpRequestException($"Flights API error: {uri}", e);
             }
