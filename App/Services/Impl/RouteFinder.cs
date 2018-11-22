@@ -18,19 +18,21 @@ namespace AirportsDemo.App.Services.Impl
             this.config = config;
         }
 
-        public async Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport) {
-            var visitedAirports = new HashSet<string>();
-            visitedAirports.Add(srcAirport);
-
+        public async Task<Flight[]> FindRouteAsync(string srcAirport, string destAirport, CancellationToken ct) {
+            var visitedAirports = new HashSet<string> { srcAirport };
             var queue = new Queue<RouteNode>();
             queue.Enqueue(new RouteNode(srcAirport, null, null));
 
-            while (queue.Count > 0) {
+            while (!ct.IsCancellationRequested && queue.Count > 0) {
                 List<RouteNode> parents = BatchDequeue(queue, config.MaxDegreeOfParallelism);
 
                 List<Flight>[] childrenData = await Task.WhenAll(
                     parents.Select(item => flightsService.GetActiveOutgoingFlightsAsync(item.Airport))
                 );
+
+                if (ct.IsCancellationRequested) {
+                    break;
+                }
 
                 for (int i = 0; i < childrenData.Length; i++) {
                     RouteNode parent = parents[i];
@@ -51,6 +53,10 @@ namespace AirportsDemo.App.Services.Impl
                         }
                     }
                 }
+            }
+
+            if (ct.IsCancellationRequested) {
+                ct.ThrowIfCancellationRequested();
             }
 
             return Array.Empty<Flight>();

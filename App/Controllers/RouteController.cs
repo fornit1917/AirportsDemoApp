@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AirportsDemo.App.Models;
 using AirportsDemo.App.Services;
+using System.Threading;
 
 namespace AirportsDemo.App.Controllers
 {
@@ -22,6 +23,10 @@ namespace AirportsDemo.App.Controllers
 
         [HttpGet("search")]
         public async Task<ActionResult<Flight[]>> Search(string srcAirport, string destAirport) {
+            if (srcAirport == destAirport) {
+                return BadRequest(new { Message = "Source and destination airports can not be same" });
+            }
+
             ValidationResult airportValidationResult = await flightsService.ValidateAirportCodeAsync(srcAirport);
             if (!airportValidationResult.IsValid) {
                 return GetInvalidAirportErrorResponse(airportValidationResult);
@@ -32,7 +37,7 @@ namespace AirportsDemo.App.Controllers
                 return GetInvalidAirportErrorResponse(airportValidationResult);
             }
 
-            Flight[] route = await routeFinder.FindRouteAsync(srcAirport, destAirport);
+            Flight[] route = await routeFinder.FindRouteAsync(srcAirport, destAirport, CancellationToken.None);
             return Ok(route);
         }
 
